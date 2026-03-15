@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../screens/add_expense_screen.dart';
+import '../screens/add_expense_screen.dart'2;
 import '../screens/add_trip_screen.dart';
 import '../screens/home_screen.dart';
 import '../screens/profile_screen.dart';
