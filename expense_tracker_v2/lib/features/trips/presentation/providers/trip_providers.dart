@@ -2,7 +2,7 @@ import 'package:expense_tracker_v2/features/trips/domain/trip.dart';
 import 'package:expense_tracker_v2/features/trips/domain/trip_repository.dart';
 import 'package:expense_tracker_v2/features/trips/data/trip_repository_impl.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'auth_provider.dart';
+import '../../../auth/presentation/providers/auth_provider.dart';
 
 final tripRepositoryProvider = Provider<TripRepository>((ref) {
   return TripRepositoryImpl();
