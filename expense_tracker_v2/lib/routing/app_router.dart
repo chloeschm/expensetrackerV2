@@ -137,14 +137,3 @@ class AuthNotifier extends Notifier<String?> {
     state = null;
   }
 }
-
-class AuthRouterNotifier extends ChangeNotifier {
-  String? userId;
-
-  void updateUser(String? id) {
-    userId = id;
-    notifyListeners();
-  }
-}
-
-final authProvider = NotifierProvider<AuthNotifier, String?>(AuthNotifier.new);
