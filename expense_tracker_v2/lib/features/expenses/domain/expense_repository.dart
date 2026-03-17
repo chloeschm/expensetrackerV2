@@ -5,5 +5,5 @@ abstract class ExpenseRepository {
   Stream<List<Expense>> getExpensesForTrip(String tripId);
   Future<void> addExpense(Expense expense, String tripId);
   Future<void> updateExpense(Expense expense, String tripId);
-  Future<void> deleteExpense(String tripId, Expense expense);
+  Future<void> deleteExpense(Expense expense, String tripId);
 }

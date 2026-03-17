@@ -42,7 +42,7 @@ class ExpenseRepositoryImpl implements ExpenseRepository {
   }
 
   @override
-  Future<void> deleteExpense(String tripId, Expense expense) async {
+  Future<void> deleteExpense(Expense expense, String tripId) async {
     DocumentReference tripRef = _firestore.collection('trips').doc(tripId);
     await tripRef.update({
       'expenses': FieldValue.arrayRemove([_expenseToMap(expense)]),
