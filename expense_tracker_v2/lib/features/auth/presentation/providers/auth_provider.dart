@@ -1,4 +1,3 @@
-import 'package:expense_tracker_v2/routing/app_router.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter/material.dart';
