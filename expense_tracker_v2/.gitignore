@@ -14,7 +14,7 @@ migrate_working_dir/
 
 # api keys and config
 firebase_options.dart
-lib/config.dart
+lib/core/config/config.dart
 google-services.json
 GoogleService-Info.plist
 

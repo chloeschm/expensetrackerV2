@@ -40,6 +40,14 @@ class TripNotifier extends AsyncNotifier<List<Trip>> {
     await ref.read(tripRepositoryProvider).deleteTrip(tripId);
     ref.invalidateSelf();
   }
+
+  Future<void> joinTrip(String code) async {
+    state = const AsyncLoading();
+    final userId = ref.read(authProvider);
+    if (userId == null) throw Exception('Not logged in');
+    await ref.read(tripRepositoryProvider).joinTripByCode(code, userId);
+    ref.invalidateSelf();
+  }
 }
 
 final tripNotifierProvider = AsyncNotifierProvider<TripNotifier, List<Trip>>(
