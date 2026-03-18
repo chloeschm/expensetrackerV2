@@ -7,6 +7,7 @@ import '../../domain/trip.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../../profile/presentation/providers/profile_provider.dart';
 import '../widgets/date_button.dart';
+import '../../../../core/widgets/label.dart';
 
 class AddTripScreen extends ConsumerStatefulWidget {
   const AddTripScreen({super.key});
@@ -202,7 +203,7 @@ class _AddTripScreenState extends ConsumerState<AddTripScreen> {
               ] else
                 const SizedBox(height: 16),
 
-              const _Label('Trip Name'),
+              const Label(text: 'Trip Name'),
               const SizedBox(height: 8),
               TextFormField(
                 controller: _nameController,
@@ -213,7 +214,7 @@ class _AddTripScreenState extends ConsumerState<AddTripScreen> {
               ),
               const SizedBox(height: 20),
 
-              const _Label('Destination'),
+              const Label(text: 'Destination'),
               const SizedBox(height: 8),
               TextFormField(
                 controller: _destinationController,
@@ -264,7 +265,7 @@ class _AddTripScreenState extends ConsumerState<AddTripScreen> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const _Label('Budget'),
+                        const Label(text: 'Budget'),
                         const SizedBox(height: 8),
                         SizedBox(
                           height: 56,
@@ -293,7 +294,7 @@ class _AddTripScreenState extends ConsumerState<AddTripScreen> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const _Label('Currency'),
+                        const Label(text: 'Currency'),
                         const SizedBox(height: 8),
                         SizedBox(
                           height: 56,
@@ -346,23 +347,6 @@ class _AddTripScreenState extends ConsumerState<AddTripScreen> {
             ],
           ),
         ),
-      ),
-    );
-  }
-}
-
-class _Label extends StatelessWidget {
-  final String text;
-  const _Label(this.text);
-
-  @override
-  Widget build(BuildContext context) {
-    return Text(
-      text,
-      style: const TextStyle(
-        fontSize: 14,
-        fontWeight: FontWeight.w600,
-        color: Color(0xFF0F2B2E),
       ),
     );
   }

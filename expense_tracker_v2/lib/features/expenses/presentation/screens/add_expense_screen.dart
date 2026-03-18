@@ -1,29 +1,26 @@
+import 'package:expense_tracker_v2/features/expenses/domain/expense.dart';
+import 'package:expense_tracker_v2/features/profile/presentation/providers/profile_provider.dart';
 import 'package:flutter/material.dart';
-import '../models/expense.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
-import 'package:provider/provider.dart';
-import '../providers/trip_provider.dart';
-import 'dart:convert';
-import 'dart:io';
-import 'package:http/http.dart' as http;
+import '..//../providers/expense_providers.dart';
 import 'package:image_picker/image_picker.dart';
-import '../config.dart';
-import '../app_theme.dart';
+import '../../../../core/theme/app_theme.dart';
+import 'package:go_router/go_router.dart';
+import 'add_expense_args.dart';
+import '../widgets/action_button.dart';
+import '../../../../core/widgets/label.dart';
+import '../../../../core/services/ai_expense_parser.dart';
+import '../widgets/ai_parse_dialog.dart';
 
-class AddExpenseScreen extends StatefulWidget {
-  final String tripId;
-  final Expense? existingExpense;
-  const AddExpenseScreen({
-    super.key,
-    required this.tripId,
-    this.existingExpense,
-  });
+class AddExpenseScreen extends ConsumerStatefulWidget {
+  const AddExpenseScreen({super.key});
 
   @override
-  State<AddExpenseScreen> createState() => _AddExpenseScreenState();
+  ConsumerState<AddExpenseScreen> createState() => _AddExpenseScreenState();
 }
 
-class _AddExpenseScreenState extends State<AddExpenseScreen> {
+class _AddExpenseScreenState extends ConsumerState<AddExpenseScreen> {
   final _formKey = GlobalKey<FormState>();
   String _title = '';
   double _amount = 0.0;
@@ -36,8 +33,9 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
   DateTime _date = DateTime.now();
   String? _notes;
   bool _isLoading = false;
+  AddExpenseArgs? _args;
 
-  bool get _isEditing => widget.existingExpense != null;
+  bool get _isEditing => _args?.existingExpense != null;
 
   static const _currencies = ['USD', 'EUR', 'AUD', 'GBP', 'JPY', 'CNY', 'INR'];
 
@@ -62,16 +60,6 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
     ),
     ExpenseCategory.other: (icon: Icons.category_rounded, label: 'Other'),
   };
-
-  String get _systemPrompt =>
-      'Today is ${DateFormat('yyyy-MM-dd').format(DateTime.now())}. '
-      'The user is inputting a travel expense. '
-      'Extract the title, amount (as 0.00), currency (default USD), '
-      'category (one of: food, transport, accommodation, activities, shopping, health, other), '
-      'and date (as yyyy-MM-dd). '
-      'Respond with raw JSON only — no markdown, no code fences, no extra text. '
-      'Example: {"title":"Coffee","amount":"3.50","currency":"USD","category":"food","date":"2024-06-01"}';
-
   @override
   void dispose() {
     _titleController.dispose();
@@ -84,8 +72,20 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
   @override
   void initState() {
     super.initState();
-    if (_isEditing) {
-      final e = widget.existingExpense!;
+  }
+
+  bool _initialized = false;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (_initialized) return;
+    _initialized = true;
+
+    _args = GoRouterState.of(context).extra as AddExpenseArgs;
+
+    if (_args?.existingExpense != null) {
+      final e = _args!.existingExpense!;
       _titleController.text = e.title;
       _title = e.title;
       _amountController.text = e.amount.toStringAsFixed(2);
@@ -96,18 +96,11 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
       _notesController.text = e.notes ?? '';
       _notes = e.notes;
     }
-  }
 
-  bool _initialized = false;
-
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    if (_initialized) return;
-    _initialized = true;
     if (!_isEditing) {
       setState(() {
-        _currency = context.read<TripProvider>().preferredCurrency;
+        _currency =
+            ref.read(userProfileProvider).value?.preferredCurrency ?? 'USD';
       });
     }
   }
@@ -134,114 +127,18 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
     });
   }
 
-  Future<void> _showAiDialog() async {
-    _aiController.clear();
-    await showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
-      ),
-      builder: (ctx) => Padding(
-        padding: EdgeInsets.fromLTRB(
-          20,
-          16,
-          20,
-          MediaQuery.of(ctx).viewInsets.bottom + 20,
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Center(
-              child: Container(
-                width: 40,
-                height: 4,
-                decoration: BoxDecoration(
-                  color: AppTheme.border,
-                  borderRadius: BorderRadius.circular(2),
-                ),
-              ),
-            ),
-            const SizedBox(height: 16),
-            const Text(
-              'AI Parse Text',
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700),
-            ),
-            const SizedBox(height: 4),
-            const Text(
-              'Describe your expense in plain English',
-              style: TextStyle(fontSize: 14, color: AppTheme.textSecondary),
-            ),
-            const SizedBox(height: 16),
-            TextField(
-              controller: _aiController,
-              autofocus: true,
-              decoration: InputDecoration(
-                hintText: 'e.g. \$45 dinner in Paris last night',
-                filled: true,
-                fillColor: const Color(0xFFF3F4F6),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(14),
-                  borderSide: BorderSide.none,
-                ),
-              ),
-            ),
-            const SizedBox(height: 16),
-            SizedBox(
-              width: double.infinity,
-              height: 50,
-              child: ElevatedButton(
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: AppTheme.primary,
-                  foregroundColor: Colors.white,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(14),
-                  ),
-                  elevation: 0,
-                ),
-                onPressed: () {
-                  Navigator.pop(ctx);
-                  if (_aiController.text.isNotEmpty) {
-                    _parseNaturalLanguage(_aiController.text);
-                  }
-                },
-                child: const Text(
-                  'Parse',
-                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
+ Future<void> _showAiDialog() async {
+  await showAiParseDialog(
+    context,
+    onParse: (input) => _parseNaturalLanguage(input),
+  );
+}
 
   Future<void> _parseNaturalLanguage(String input) async {
     setState(() => _isLoading = true);
     try {
-      final response = await http.post(
-        Uri.parse('https://api.openai.com/v1/chat/completions'),
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer ${Config.openAiApiKey}',
-        },
-        body: jsonEncode({
-          'model': 'gpt-4o-mini',
-          'messages': [
-            {'role': 'system', 'content': _systemPrompt},
-            {'role': 'user', 'content': input},
-          ],
-        }),
-      );
-      final data = jsonDecode(response.body);
-      final content = data['choices'][0]['message']['content'] as String;
-      final cleaned = content
-          .replaceAll('```json', '')
-          .replaceAll('```', '')
-          .trim();
-      _fillFormFromParsed(jsonDecode(cleaned));
+      final parsed = await AiExpenseParser.parseText(input);
+      if (parsed != null) _fillFormFromParsed(parsed);
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(
@@ -256,55 +153,16 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
   Future<void> _scanReceipt() async {
     final source = await _showImageSourceDialog();
     if (source == null) return;
-    final picker = ImagePicker();
-    final picked = await picker.pickImage(source: source, imageQuality: 85);
-    if (picked == null) return;
-
     setState(() => _isLoading = true);
     try {
-      final bytes = await File(picked.path).readAsBytes();
-      final base64Image = base64Encode(bytes);
-      final mimeType = picked.path.toLowerCase().endsWith('.png')
-          ? 'image/png'
-          : 'image/jpeg';
-      final response = await http.post(
-        Uri.parse('https://api.openai.com/v1/chat/completions'),
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer ${Config.openAiApiKey}',
-        },
-        body: jsonEncode({
-          'model': 'gpt-4o',
-          'messages': [
-            {'role': 'system', 'content': _systemPrompt},
-            {
-              'role': 'user',
-              'content': [
-                {
-                  'type': 'image_url',
-                  'image_url': {'url': 'data:$mimeType;base64,$base64Image'},
-                },
-                {
-                  'type': 'text',
-                  'text': 'Extract expense details from this receipt.',
-                },
-              ],
-            },
-          ],
-          'max_tokens': 300,
-        }),
-      );
-      final data = jsonDecode(response.body);
-      final content = data['choices'][0]['message']['content'] as String;
-      final cleaned = content
-          .replaceAll('```json', '')
-          .replaceAll('```', '')
-          .trim();
-      _fillFormFromParsed(jsonDecode(cleaned));
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Receipt scanned — please review')),
-        );
+      final parsed = await AiExpenseParser.scanReceipt(source);
+      if (parsed != null) {
+        _fillFormFromParsed(parsed);
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Receipt scanned — please review')),
+          );
+        }
       }
     } catch (e) {
       if (mounted) {
@@ -362,34 +220,37 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
   void _submit() {
     if (!_formKey.currentState!.validate()) return;
     if (_isEditing) {
-      context.read<TripProvider>().updateExpense(
-        widget.tripId,
-        Expense(
-          id: widget.existingExpense!.id,
-          title: _title,
-          amount: _amount,
-          currency: _currency,
-          category: _category,
-          date: _date,
-          notes: _notes,
-          addedBy: widget.existingExpense!.addedBy,
-        ),
-      );
+      ref
+          .read(expenseNotifierProvider(_args!.tripId).notifier)
+          .updateExpense(
+            Expense(
+              id: _args!.existingExpense!.id,
+              title: _title,
+              amount: _amount,
+              currency: _currency,
+              category: _category,
+              date: _date,
+              notes: _notes,
+              addedBy: _args!.existingExpense!.addedBy,
+            ),
+          );
     } else {
-      context.read<TripProvider>().addExpense(
-        widget.tripId,
-        Expense(
-          title: _title,
-          amount: _amount,
-          currency: _currency,
-          category: _category,
-          date: _date,
-          notes: _notes,
-          addedBy: context.read<TripProvider>().displayName,
-        ),
-      );
+      ref
+          .read(expenseNotifierProvider(_args!.tripId).notifier)
+          .addExpense(
+            Expense(
+              title: _title,
+              amount: _amount,
+              currency: _currency,
+              category: _category,
+              date: _date,
+              notes: _notes,
+              addedBy:
+                  ref.read(userProfileProvider).value?.displayName ?? 'Unknown',
+            ),
+          );
     }
-    Navigator.pop(context);
+    context.pop();
   }
 
   @override
@@ -420,7 +281,7 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
                   Row(
                     children: [
                       Expanded(
-                        child: _ActionButton(
+                        child: ActionButton(
                           icon: Icons.auto_awesome_rounded,
                           label: 'AI Parse Text',
                           onTap: _isLoading ? null : _showAiDialog,
@@ -428,7 +289,7 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
                       ),
                       const SizedBox(width: 12),
                       Expanded(
-                        child: _ActionButton(
+                        child: ActionButton(
                           icon: Icons.receipt_long_rounded,
                           label: 'Scan Receipt',
                           onTap: _isLoading ? null : _scanReceipt,
@@ -438,7 +299,7 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
                   ),
                   const SizedBox(height: 24),
 
-                  _Label('Title'),
+                  Label(text: 'Title'),
                   const SizedBox(height: 8),
                   TextFormField(
                     controller: _titleController,
@@ -457,7 +318,7 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            _Label('Amount'),
+                            Label(text: 'Amount'),
                             const SizedBox(height: 8),
                             TextFormField(
                               controller: _amountController,
@@ -478,7 +339,7 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            _Label('Currency'),
+                            Label(text: 'Currency'),
                             const SizedBox(height: 8),
                             DropdownButtonFormField<String>(
                               key: ValueKey(_currency),
@@ -501,7 +362,7 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
                   ),
                   const SizedBox(height: 20),
 
-                  _Label('Date'),
+                  Label(text: 'Date'),
                   const SizedBox(height: 8),
                   InkWell(
                     onTap: () async {
@@ -544,7 +405,7 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
                   ),
                   const SizedBox(height: 20),
 
-                  _Label('Category'),
+                  Label(text: 'Category'),
                   const SizedBox(height: 12),
                   Wrap(
                     spacing: 8,
@@ -595,7 +456,7 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
                   ),
                   const SizedBox(height: 20),
 
-                  _Label('Notes (Optional)'),
+                  Label(text: 'Notes (Optional)'),
                   const SizedBox(height: 8),
                   TextFormField(
                     controller: _notesController,
@@ -664,63 +525,4 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
     ),
     contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
   );
-}
-
-class _Label extends StatelessWidget {
-  final String text;
-  const _Label(this.text);
-
-  @override
-  Widget build(BuildContext context) {
-    return Text(
-      text,
-      style: const TextStyle(
-        fontSize: 14,
-        fontWeight: FontWeight.w600,
-        color: Color(0xFF0F2B2E),
-      ),
-    );
-  }
-}
-
-class _ActionButton extends StatelessWidget {
-  final IconData icon;
-  final String label;
-  final VoidCallback? onTap;
-
-  const _ActionButton({
-    required this.icon,
-    required this.label,
-    required this.onTap,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        padding: const EdgeInsets.symmetric(vertical: 14),
-        decoration: BoxDecoration(
-          color: const Color(0xFFEAF4F4),
-          borderRadius: BorderRadius.circular(14),
-          border: Border.all(color: AppTheme.primary.withOpacity(0.2)),
-        ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(icon, size: 18, color: AppTheme.primary),
-            const SizedBox(width: 8),
-            Text(
-              label,
-              style: const TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.w600,
-                color: AppTheme.primary,
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
 }

@@ -7,7 +7,10 @@ final expenseRepositoryProvider = Provider<ExpenseRepository>((ref) {
   return ExpenseRepositoryImpl();
 });
 
-final expensesProvider = StreamProvider.family<List<Expense>, String>((ref, tripId) {
+final expensesProvider = StreamProvider.family<List<Expense>, String>((
+  ref,
+  tripId,
+) {
   final repo = ref.watch(expenseRepositoryProvider);
   return repo.getExpensesForTrip(tripId);
 });
@@ -33,8 +36,15 @@ class ExpenseNotifier extends AsyncNotifier<List<Expense>> {
     await ref.read(expenseRepositoryProvider).deleteExpense(expense, tripId);
     ref.invalidateSelf();
   }
+
+  Future<void> updateExpense(Expense expense) async {
+    state = const AsyncLoading();
+    await ref.read(expenseRepositoryProvider).updateExpense(expense, tripId);
+    ref.invalidateSelf();
+  }
 }
 
-final expenseNotifierProvider = AsyncNotifierProvider.family<ExpenseNotifier, List<Expense>, String>(
-  ExpenseNotifier.new,
-);
+final expenseNotifierProvider =
+    AsyncNotifierProvider.family<ExpenseNotifier, List<Expense>, String>(
+      ExpenseNotifier.new,
+    );

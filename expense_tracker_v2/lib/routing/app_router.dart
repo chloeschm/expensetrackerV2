@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../features/auth/presentation/providers/auth_provider.dart' show AuthRouterNotifier, authProvider;
+import '../features/auth/presentation/providers/auth_provider.dart'
+    show AuthRouterNotifier, authProvider;
 import '../features/expenses/presentation/screens/add_expense_screen.dart';
 import '../features/profile/presentation/screens/profile_screen.dart';
 import '../features/auth/presentation/screens/login_screen.dart';
@@ -12,7 +13,7 @@ import '../features/trips/presentation/screens/home_screen.dart';
 
 final routerProvider = Provider<GoRouter>((ref) {
   final notifier = AuthRouterNotifier();
-  ref.listen <String?>(authProvider, (previous, next) {
+  ref.listen<String?>(authProvider, (previous, next) {
     notifier.updateUser(next);
   });
 

@@ -19,7 +19,7 @@ class Expense {
   final String addedBy;
 
   Expense({
-    required this.id,
+    this.id = '',
     required this.title,
     required this.amount,
     required this.currency,
