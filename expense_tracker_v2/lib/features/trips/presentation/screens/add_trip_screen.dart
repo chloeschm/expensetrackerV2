@@ -291,7 +291,7 @@ class _AddTripScreenState extends State<AddTripScreen> {
                         SizedBox(
                           height: 56,
                           child: DropdownButtonFormField<String>(
-                            value: _currency,
+                            initialValue: _currency,
                             isDense: true,
                             decoration: _inputDecoration(''),
                             items: _currencies

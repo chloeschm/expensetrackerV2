@@ -196,7 +196,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           color: Color(0xFF0F2B2E))),
                   const SizedBox(height: 8),
                   DropdownButtonFormField<String>(
-                    value: _selectedCurrency,
+                    initialValue: _selectedCurrency,
                     decoration: _inputDecoration(''),
                     items: _currencies
                         .map((c) => DropdownMenuItem(

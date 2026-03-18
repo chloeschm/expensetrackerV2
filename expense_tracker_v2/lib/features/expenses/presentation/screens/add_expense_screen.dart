@@ -482,7 +482,7 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
                             const SizedBox(height: 8),
                             DropdownButtonFormField<String>(
                               key: ValueKey(_currency),
-                              value: _currency,
+                              initialValue: _currency,
                               decoration: _inputDecoration(''),
                               items: _currencies
                                   .map(
