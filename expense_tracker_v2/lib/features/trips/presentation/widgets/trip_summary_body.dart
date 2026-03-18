@@ -1,63 +1,25 @@
-import 'package:expense_tracker_v2/features/trips/presentation/providers/trip_providers.dart';
 import 'package:flutter/material.dart';
 import 'package:fl_chart/fl_chart.dart';
 import '../../domain/trip.dart';
-import '../../../../core/services/currency_service.dart';
 import '../../../../core/theme/app_theme.dart';
-import 'package:go_router/go_router.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../presentation/utils/expense_category_utils.dart';
 import '../utils/pdf_export_utils.dart';
-import '../widgets/trip_summary_body.dart';
 
-class TripSummaryScreen extends ConsumerStatefulWidget {
-  const TripSummaryScreen({super.key});
+class TripSummaryBody extends StatefulWidget {
+  const TripSummaryBody({super.key, required this.trip});
+  
+  final Trip trip;
 
   @override
-  ConsumerState<TripSummaryScreen> createState() => _TripSummaryScreenState();
+  State<TripSummaryBody> createState() => _TripSummaryBodyState();
 }
 
-class _TripSummaryScreenState extends ConsumerState<TripSummaryScreen> {
-  final _currencyService = CurrencyService();
-  bool _ratesLoaded = false;
+class _TripSummaryBodyState extends State<TripSummaryBody> {
   int _touchedIndex = -1;
 
   @override
   Widget build(BuildContext context) {
-    final tripId = GoRouterState.of(context).pathParameters['tripId']!;
-    final tripsAsync = ref.watch(tripNotifierProvider);
-    final currentTrip = tripsAsync
-        .whenData((trips) => trips.firstWhere((t) => t.id == tripId))
-        .value;
-    if (!_ratesLoaded) {
-      if (currentTrip == null) return const Center(child: CircularProgressIndicator());
-      _currencyService.fetchRates(currentTrip.currency).then((_) {
-        if (mounted) setState(() => _ratesLoaded = true);
-      });
-    }
-
-    return Scaffold(
-      backgroundColor: Colors.white,
-      appBar: AppBar(
-        backgroundColor: Colors.white,
-        elevation: 0,
-        title: const Text(
-          'Trip Summary',
-          style: TextStyle(fontWeight: FontWeight.w700),
-        ),
-        bottom: PreferredSize(
-          preferredSize: const Size.fromHeight(1),
-          child: Container(height: 1, color: AppTheme.border),
-        ),
-      ),
-      body: _ratesLoaded
-          ? TripSummaryBody(trip: currentTrip!)
-          : const Center(child: CircularProgressIndicator()),
-    );
-  }
-
-  Widget buildSummary(Trip trip) {
-    final totals = getCategoryTotals(trip);
+    final totals = getCategoryTotals(widget.trip);
 
     if (totals.isEmpty) {
       return Center(
@@ -92,7 +54,7 @@ class _TripSummaryScreenState extends ConsumerState<TripSummaryScreen> {
     }
 
     final grandTotal = totals.values.reduce((a, b) => a + b);
-    final remaining = trip.budget - grandTotal;
+    final remaining = widget.trip.budget - grandTotal;
     final isOverBudget = remaining < 0;
 
     final sections = totals.entries.toList().asMap().entries.map((entry) {
@@ -116,7 +78,7 @@ class _TripSummaryScreenState extends ConsumerState<TripSummaryScreen> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            trip.name.toUpperCase(),
+            widget.trip.name.toUpperCase(),
             style: const TextStyle(
               fontSize: 12,
               fontWeight: FontWeight.w600,
@@ -187,7 +149,7 @@ class _TripSummaryScreenState extends ConsumerState<TripSummaryScreen> {
                         mainAxisSize: MainAxisSize.min,
                         children: [
                           Text(
-                            '${trip.currency} ${grandTotal.toStringAsFixed(0)}',
+                            '${widget.trip.currency} ${grandTotal.toStringAsFixed(0)}',
                             style: const TextStyle(
                               fontSize: 20,
                               fontWeight: FontWeight.w800,
@@ -267,7 +229,7 @@ class _TripSummaryScreenState extends ConsumerState<TripSummaryScreen> {
                       ),
                       const SizedBox(height: 6),
                       Text(
-                        '${trip.currency} ${grandTotal.toStringAsFixed(2)}',
+                        '${widget.trip.currency} ${grandTotal.toStringAsFixed(2)}',
                         style: const TextStyle(
                           fontSize: 20,
                           fontWeight: FontWeight.w800,
@@ -300,7 +262,7 @@ class _TripSummaryScreenState extends ConsumerState<TripSummaryScreen> {
                       ),
                       const SizedBox(height: 6),
                       Text(
-                        '${trip.currency} ${remaining.abs().toStringAsFixed(2)}',
+                        '${widget.trip.currency} ${remaining.abs().toStringAsFixed(2)}',
                         style: TextStyle(
                           fontSize: 20,
                           fontWeight: FontWeight.w800,
@@ -323,7 +285,7 @@ class _TripSummaryScreenState extends ConsumerState<TripSummaryScreen> {
             width: double.infinity,
             height: 54,
             child: ElevatedButton.icon(
-              onPressed: () => exportPDF(trip),
+              onPressed: () => exportPDF(widget.trip),
               style: ElevatedButton.styleFrom(
                 backgroundColor: AppTheme.primary,
                 foregroundColor: Colors.white,
