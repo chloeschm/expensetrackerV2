@@ -1,20 +1,20 @@
+import 'package:expense_tracker_v2/features/auth/presentation/providers/auth_provider.dart';
+import 'package:expense_tracker_v2/features/trips/presentation/providers/trip_providers.dart';
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
-import '../providers/trip_provider.dart';
-import 'package:intl/intl.dart';
-import '../models/trip.dart';
-import 'package:firebase_auth/firebase_auth.dart';
-import '../app_theme.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
+import '../../domain/trip.dart';
+import '../../../../core/theme/app_theme.dart';
+import '../../../profile/presentation/providers/profile_provider.dart';
+import '../widgets/date_button.dart';
 
-class AddTripScreen extends StatefulWidget {
-  const AddTripScreen({super.key, this.existingTrip});
-  final Trip? existingTrip;
-
+class AddTripScreen extends ConsumerStatefulWidget {
+  const AddTripScreen({super.key});
   @override
-  State<AddTripScreen> createState() => _AddTripScreenState();
+  ConsumerState<AddTripScreen> createState() => _AddTripScreenState();
 }
 
-class _AddTripScreenState extends State<AddTripScreen> {
+class _AddTripScreenState extends ConsumerState<AddTripScreen> {
   final _formKey = GlobalKey<FormState>();
   final _nameController = TextEditingController();
   final _destinationController = TextEditingController();
@@ -24,7 +24,7 @@ class _AddTripScreenState extends State<AddTripScreen> {
   String _currency = 'USD';
   double _budget = 0.0;
 
-  bool get _isEditing => widget.existingTrip != null;
+  bool get _isEditing => GoRouterState.of(context).extra != null;
 
   static const _currencies = [
     ('USD', 'USD (\$)'),
@@ -38,21 +38,24 @@ class _AddTripScreenState extends State<AddTripScreen> {
 
   bool _initialized = false;
 
+  Trip? _existingTrip;
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
     if (_initialized) return;
     _initialized = true;
+    _existingTrip = GoRouterState.of(context).extra as Trip?;
     if (_isEditing) {
-      _nameController.text = widget.existingTrip!.name;
-      _destinationController.text = widget.existingTrip!.destination;
-      _startDate = widget.existingTrip!.startDate;
-      _endDate = widget.existingTrip!.endDate;
-      _currency = widget.existingTrip!.currency;
-      _budgetController.text = widget.existingTrip!.budget.toStringAsFixed(2);
-      _budget = widget.existingTrip!.budget;
+      _nameController.text = _existingTrip!.name;
+      _destinationController.text = _existingTrip!.destination;
+      _startDate = _existingTrip!.startDate;
+      _endDate = _existingTrip!.endDate;
+      _currency = _existingTrip!.currency;
+      _budgetController.text = _existingTrip!.budget.toStringAsFixed(2);
+      _budget = _existingTrip!.budget;
     } else {
-      _currency = context.read<TripProvider>().preferredCurrency;
+      final profile = ref.read(userProfileProvider).value;
+      _currency = profile?.preferredCurrency ?? 'USD';
     }
   }
 
@@ -93,38 +96,42 @@ class _AddTripScreenState extends State<AddTripScreen> {
       return;
     }
 
-    final uid = FirebaseAuth.instance.currentUser!.uid;
+    final uid = ref.read(authProvider)!;
 
     if (_isEditing) {
-      context.read<TripProvider>().updateTrip(
-        Trip(
-          id: widget.existingTrip!.id,
-          name: _nameController.text.trim(),
-          destination: _destinationController.text.trim(),
-          startDate: _startDate!,
-          endDate: _endDate,
-          budget: _budget,
-          currency: _currency,
-          expenses: widget.existingTrip!.expenses,
-          joinCode: widget.existingTrip!.joinCode,
-          members: widget.existingTrip!.members,
-          createdBy: uid,
-        ),
-      );
+      ref
+          .read(tripNotifierProvider.notifier)
+          .updateTrip(
+            Trip(
+              id: _existingTrip!.id,
+              name: _nameController.text.trim(),
+              destination: _destinationController.text.trim(),
+              startDate: _startDate!,
+              endDate: _endDate,
+              budget: _budget,
+              currency: _currency,
+              expenses: _existingTrip!.expenses,
+              joinCode: _existingTrip!.joinCode,
+              members: _existingTrip!.members,
+              createdBy: uid,
+            ),
+          );
     } else {
-      context.read<TripProvider>().addTrip(
-        Trip(
-          name: _nameController.text.trim(),
-          destination: _destinationController.text.trim(),
-          startDate: _startDate!,
-          endDate: _endDate,
-          budget: _budget,
-          currency: _currency,
-          createdBy: uid,
-        ),
-      );
+      ref
+          .read(tripNotifierProvider.notifier)
+          .addTrip(
+            Trip(
+              name: _nameController.text.trim(),
+              destination: _destinationController.text.trim(),
+              startDate: _startDate!,
+              endDate: _endDate,
+              budget: _budget,
+              currency: _currency,
+              createdBy: uid,
+            ),
+          );
     }
-    Navigator.pop(context);
+    context.pop();
   }
 
   InputDecoration _inputDecoration(String hint, {Widget? prefixIcon}) =>
@@ -229,20 +236,20 @@ class _AddTripScreenState extends State<AddTripScreen> {
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
                   Expanded(
-                    child: _DateButton(
+                    child: DateButton(
                       label: 'YYYY-MM-DD',
                       date: _startDate,
                       onTap: () => _pickDate(isStart: true),
-                      labelText: 'Start Date',
+                      labelText: 'Start Date', key: null,
                     ),
                   ),
                   const SizedBox(width: 12),
                   Expanded(
-                    child: _DateButton(
+                    child: DateButton(
                       label: 'YYYY-MM-DD',
                       date: _endDate,
                       onTap: () => _pickDate(isStart: false),
-                      labelText: 'End Date',
+                      labelText: 'End Date', key: null,
                     ),
                   ),
                 ],
@@ -361,72 +368,3 @@ class _Label extends StatelessWidget {
   }
 }
 
-class _DateButton extends StatelessWidget {
-  final String label;
-  final String? labelText;
-  final DateTime? date;
-  final VoidCallback onTap;
-
-  const _DateButton({
-    required this.label,
-    required this.date,
-    required this.onTap,
-    this.labelText,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        if (labelText != null) ...[
-          Text(
-            labelText!,
-            style: const TextStyle(
-              fontSize: 14,
-              fontWeight: FontWeight.w600,
-              color: Color(0xFF0F2B2E),
-            ),
-          ),
-          const SizedBox(height: 8),
-        ],
-        InkWell(
-          onTap: onTap,
-          borderRadius: BorderRadius.circular(14),
-          child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 16),
-            decoration: BoxDecoration(
-              color: const Color(0xFFF3F4F6),
-              borderRadius: BorderRadius.circular(14),
-            ),
-            child: Row(
-              children: [
-                const Icon(
-                  Icons.calendar_today_outlined,
-                  size: 16,
-                  color: AppTheme.textSecondary,
-                ),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: Text(
-                    date == null ? label : DateFormat('MMM d, y').format(date!),
-                    style: TextStyle(
-                      fontSize: 13,
-                      color: date != null
-                          ? AppTheme.textPrimary
-                          : AppTheme.textSecondary,
-                      fontWeight: date != null
-                          ? FontWeight.w500
-                          : FontWeight.normal,
-                    ),
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-}

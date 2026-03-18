@@ -15,7 +15,7 @@ class Trip {
 
   Trip({
     List<String>? members,
-    required this.id,
+    this.id = '',
     required this.name,
     required this.destination,
     required this.startDate,
@@ -23,7 +23,7 @@ class Trip {
     required this.budget,
     this.currency = 'USD',
     List<Expense>? expenses,
-    required this.joinCode,
+    this.joinCode = '',
     required this.createdBy,
   }) : members = members ?? [],
        expenses = expenses ?? [];

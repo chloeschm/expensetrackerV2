@@ -48,6 +48,12 @@ class TripNotifier extends AsyncNotifier<List<Trip>> {
     await ref.read(tripRepositoryProvider).joinTripByCode(code, userId);
     ref.invalidateSelf();
   }
+
+  Future<void> updateTrip(Trip trip) async {
+  state = const AsyncLoading();
+  await ref.read(tripRepositoryProvider).updateTrip(trip);
+  ref.invalidateSelf();
+}
 }
 
 final tripNotifierProvider = AsyncNotifierProvider<TripNotifier, List<Trip>>(
