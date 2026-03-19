@@ -1,5 +1,3 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
-
 enum ExpenseCategory {
   food,
   transport,
@@ -38,7 +36,7 @@ class Expense {
       amount: (map['amount'] as num).toDouble(),
       currency: map['currency'] as String,
       category: ExpenseCategory.values.byName(map['category'] as String),
-      date: (map['date'] as Timestamp).toDate(),
+      date: map['date'] as DateTime,
       notes: map['notes'] as String?,
       addedBy: map['addedBy'] as String,
     );
