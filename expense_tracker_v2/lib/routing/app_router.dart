@@ -56,11 +56,15 @@ final routerProvider = Provider<GoRouter>((ref) {
                 routes: [
                   GoRoute(
                     path: "trips/:tripId",
-                    builder: (context, state) => const TripDetailScreen(),
+                    builder: (context, state) => TripDetailScreen(
+                      tripId: state.pathParameters['tripId']!,
+                    ),
                     routes: [
                       GoRoute(
                         path: "summary",
-                        builder: (context, state) => const TripSummaryScreen(),
+                        builder: (context, state) => TripSummaryScreen(
+                          tripId: state.pathParameters['tripId']!,
+                        ),
                       ),
                       GoRoute(
                         path: "expenses/new",

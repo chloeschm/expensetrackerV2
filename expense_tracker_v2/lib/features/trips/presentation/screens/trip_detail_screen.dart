@@ -11,7 +11,8 @@ import '../widgets/trip_detail_header.dart';
 import '../widgets/budget_progress_card.dart';
 
 class TripDetailScreen extends ConsumerStatefulWidget {
-  const TripDetailScreen({super.key});
+  const TripDetailScreen({super.key, required this.tripId});
+  final String tripId;
 
   @override
   ConsumerState<TripDetailScreen> createState() => _TripDetailScreenState();
@@ -23,24 +24,27 @@ class _TripDetailScreenState extends ConsumerState<TripDetailScreen> {
 
   @override
   void initState() {
-    super.initState();    
+    super.initState();
+    final trip = ref
+        .read(tripNotifierProvider)
+        .value
+        ?.firstWhere((t) => t.id == widget.tripId);
+    if (trip != null) {
+      _currencyService.fetchRates(trip.currency).then((_) {
+        if (mounted) setState(() => _ratesLoaded = true);
+      });
+    }
   }
 
   @override
   Widget build(BuildContext context) {
-    final tripId = GoRouterState.of(context).pathParameters['tripId']!;
+      final tripId = widget.tripId;
     final tripsAsync = ref.watch(tripNotifierProvider);
     final currentTrip = tripsAsync
         .whenData((trips) => trips.firstWhere((t) => t.id == tripId))
         .value;
     if (currentTrip == null) {
       return const Center(child: CircularProgressIndicator());
-    }
-
-    if (!_ratesLoaded) {
-      _currencyService.fetchRates(currentTrip.currency).then((_) {
-        if (mounted) setState(() => _ratesLoaded = true);
-      });
     }
 
     final grouped = groupExpenses(currentTrip.expenses);
