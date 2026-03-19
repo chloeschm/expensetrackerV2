@@ -31,7 +31,6 @@ class UserProfileNotifier extends AsyncNotifier<UserProfile> {
   }
 
   Future<void> saveProfile(String name, String currency) async {
-    state = state.copyWithPrevious(const AsyncLoading());
     await _db.collection('users').doc(_userId).set({
       'displayName': name,
       'preferredCurrency': currency,

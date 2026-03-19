@@ -8,6 +8,7 @@ import '../../../../core/theme/app_theme.dart';
 import '../../../profile/presentation/providers/profile_provider.dart';
 import '../widgets/date_button.dart';
 import '../../../../core/widgets/label.dart';
+import '../../../../core/utils/input_decoration.dart';
 
 class AddTripScreen extends ConsumerStatefulWidget {
   const AddTripScreen({super.key});
@@ -135,31 +136,6 @@ class _AddTripScreenState extends ConsumerState<AddTripScreen> {
     context.pop();
   }
 
-  InputDecoration _inputDecoration(String hint, {Widget? prefixIcon}) =>
-      InputDecoration(
-        hintText: hint,
-        hintStyle: const TextStyle(color: AppTheme.textSecondary, fontSize: 14),
-        prefixIcon: prefixIcon,
-        filled: true,
-        fillColor: const Color(0xFFF3F4F6),
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(14),
-          borderSide: BorderSide.none,
-        ),
-        enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(14),
-          borderSide: BorderSide.none,
-        ),
-        focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(14),
-          borderSide: const BorderSide(color: AppTheme.primary, width: 1.5),
-        ),
-        contentPadding: const EdgeInsets.symmetric(
-          horizontal: 16,
-          vertical: 16,
-        ),
-      );
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -207,7 +183,7 @@ class _AddTripScreenState extends ConsumerState<AddTripScreen> {
               const SizedBox(height: 8),
               TextFormField(
                 controller: _nameController,
-                decoration: _inputDecoration('e.g. Roadtrip to California'),
+                decoration: appInputDecoration('e.g. Roadtrip to California'),
                 textCapitalization: TextCapitalization.words,
                 validator: (v) =>
                     v == null || v.isEmpty ? 'Please enter a trip name' : null,
@@ -218,7 +194,7 @@ class _AddTripScreenState extends ConsumerState<AddTripScreen> {
               const SizedBox(height: 8),
               TextFormField(
                 controller: _destinationController,
-                decoration: _inputDecoration(
+                decoration: appInputDecoration(
                   'Where are you going?',
                   prefixIcon: const Icon(
                     Icons.map_outlined,
@@ -271,7 +247,7 @@ class _AddTripScreenState extends ConsumerState<AddTripScreen> {
                           height: 56,
                           child: TextFormField(
                             controller: _budgetController,
-                            decoration: _inputDecoration(
+                            decoration: appInputDecoration(
                               '0.00',
                               prefixIcon: const Icon(
                                 Icons.account_balance_wallet_outlined,
@@ -301,7 +277,7 @@ class _AddTripScreenState extends ConsumerState<AddTripScreen> {
                           child: DropdownButtonFormField<String>(
                             initialValue: _currency,
                             isDense: true,
-                            decoration: _inputDecoration(''),
+                            decoration: appInputDecoration(''),
                             items: _currencies
                                 .map(
                                   (c) => DropdownMenuItem(

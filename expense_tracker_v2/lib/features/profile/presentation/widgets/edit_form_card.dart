@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../providers/profile_provider.dart';
+import '../../../../core/utils/input_decoration.dart';
 
 class EditFormCard extends ConsumerStatefulWidget {
   const EditFormCard({super.key});
@@ -49,26 +50,6 @@ class _EditFormCardState extends ConsumerState<EditFormCard> {
     }
   }
 
-  InputDecoration _inputDecoration(String hint) => InputDecoration(
-    hintText: hint,
-    hintStyle: const TextStyle(color: AppTheme.textSecondary, fontSize: 14),
-    filled: true,
-    fillColor: const Color(0xFFF3F4F6),
-    border: OutlineInputBorder(
-      borderRadius: BorderRadius.circular(14),
-      borderSide: BorderSide.none,
-    ),
-    enabledBorder: OutlineInputBorder(
-      borderRadius: BorderRadius.circular(14),
-      borderSide: BorderSide.none,
-    ),
-    focusedBorder: OutlineInputBorder(
-      borderRadius: BorderRadius.circular(14),
-      borderSide: const BorderSide(color: AppTheme.primary, width: 1.5),
-    ),
-    contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
-  );
-
   @override
   Widget build(BuildContext context) {
     final isSaving = ref.watch(userProfileProvider).isLoading;
@@ -103,7 +84,7 @@ class _EditFormCardState extends ConsumerState<EditFormCard> {
           const SizedBox(height: 8),
           TextField(
             controller: _nameController,
-            decoration: _inputDecoration('Your name'),
+            decoration: appInputDecoration('Your name'),
             textCapitalization: TextCapitalization.words,
           ),
           const SizedBox(height: 20),
@@ -119,7 +100,7 @@ class _EditFormCardState extends ConsumerState<EditFormCard> {
           const SizedBox(height: 8),
           DropdownButtonFormField<String>(
             initialValue: _selectedCurrency,
-            decoration: _inputDecoration(''),
+            decoration: appInputDecoration(''),
             items: _currencies
                 .map((c) => DropdownMenuItem(value: c.$1, child: Text(c.$2)))
                 .toList(),
