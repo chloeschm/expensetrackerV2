@@ -15,30 +15,30 @@ class AuthRouterNotifier extends ChangeNotifier {
 class AuthNotifier extends Notifier<String?> {
   @override
   String? build() {
+    final sub = FirebaseAuth.instance.authStateChanges().listen((user) {
+      state = user?.uid;
+    });
+    ref.onDispose(sub.cancel);
     return FirebaseAuth.instance.currentUser?.uid;
   }
 
   Future<void> login(String email, String password) async {
-    final credential = await FirebaseAuth.instance.signInWithEmailAndPassword(
+    await FirebaseAuth.instance.signInWithEmailAndPassword(
       email: email,
       password: password,
     );
-    state = credential.user?.uid;
   }
 
   Future<void> logout() async {
     await FirebaseAuth.instance.signOut();
-    state = null;
   }
 
   Future<void> register(String email, String password) async {
-    final credential = await FirebaseAuth.instance.createUserWithEmailAndPassword(
+    await FirebaseAuth.instance.createUserWithEmailAndPassword(
       email: email,
       password: password,
     );
-    state = credential.user?.uid;
   }
 }
+
 final authProvider = NotifierProvider<AuthNotifier, String?>(AuthNotifier.new);
-
-

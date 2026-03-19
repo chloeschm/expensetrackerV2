@@ -1,3 +1,4 @@
+import 'package:expense_tracker_v2/features/expenses/domain/expense.dart';
 import 'package:expense_tracker_v2/features/trips/domain/trip.dart';
 import 'package:expense_tracker_v2/features/trips/domain/trip_repository.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -28,7 +29,9 @@ class TripRepositoryImpl implements TripRepository {
       joinCode: doc['joinCode'],
       createdBy: doc['createdBy'],
       members: List<String>.from(doc['members'] ?? []),
-      expenses: [],
+      expenses: (doc['expenses'] as List<dynamic>? ?? [])
+    .map((e) => Expense.fromMap(e as Map<String, dynamic>))
+    .toList(),
     );
   }
 

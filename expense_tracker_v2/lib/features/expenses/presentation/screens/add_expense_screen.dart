@@ -51,7 +51,7 @@ class _AddExpenseScreenState extends ConsumerState<AddExpenseScreen> {
     if (_initialized) return;
     _initialized = true;
 
-    _args = GoRouterState.of(context).extra as AddExpenseArgs;
+    _args = GoRouterState.of(context).extra as AddExpenseArgs?;
 
     if (_args?.existingExpense != null) {
       final e = _args!.existingExpense!;

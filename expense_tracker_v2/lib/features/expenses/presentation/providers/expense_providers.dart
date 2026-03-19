@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:expense_tracker_v2/features/expenses/domain/expense.dart';
 import 'package:expense_tracker_v2/features/expenses/domain/expense_repository.dart';
 import 'package:expense_tracker_v2/features/expenses/data/expense_repository_impl.dart';
@@ -22,25 +24,41 @@ class ExpenseNotifier extends AsyncNotifier<List<Expense>> {
   @override
   Future<List<Expense>> build() async {
     final repo = ref.read(expenseRepositoryProvider);
-    return await repo.getExpensesForTrip(tripId).first;
+
+    final completer = Completer<List<Expense>>();
+
+    final sub = repo
+        .getExpensesForTrip(tripId)
+        .listen(
+          (expenses) {
+            if (!completer.isCompleted) {
+              completer.complete(expenses);
+            } else {
+              state = AsyncData(expenses);
+            }
+          },
+          onError: (e) {
+            if (!completer.isCompleted) completer.completeError(e);
+          },
+        );
+
+    ref.onDispose(sub.cancel);
+
+    return completer.future;
   }
 
-  Future<void> addExpense(Expense expense) async {
-    state = const AsyncLoading();
-    await ref.read(expenseRepositoryProvider).addExpense(expense, tripId);
-    ref.invalidateSelf();
-  }
+Future<void> addExpense(Expense expense) async {
+  await ref.read(expenseRepositoryProvider).addExpense(expense, tripId);
+}
 
   Future<void> deleteExpense(Expense expense) async {
     state = const AsyncLoading();
     await ref.read(expenseRepositoryProvider).deleteExpense(expense, tripId);
-    ref.invalidateSelf();
   }
 
   Future<void> updateExpense(Expense expense) async {
     state = const AsyncLoading();
     await ref.read(expenseRepositoryProvider).updateExpense(expense, tripId);
-    ref.invalidateSelf();
   }
 }
 

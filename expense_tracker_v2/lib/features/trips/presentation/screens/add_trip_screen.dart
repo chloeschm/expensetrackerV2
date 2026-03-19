@@ -130,6 +130,7 @@ class _AddTripScreenState extends ConsumerState<AddTripScreen> {
               budget: _budget,
               currency: _currency,
               createdBy: uid,
+              members: [uid],
             ),
           );
     }

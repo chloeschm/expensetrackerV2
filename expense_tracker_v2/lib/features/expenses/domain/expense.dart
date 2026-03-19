@@ -1,3 +1,5 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+
 enum ExpenseCategory {
   food,
   transport,
@@ -28,4 +30,17 @@ class Expense {
     this.notes,
     required this.addedBy,
   });
+
+  factory Expense.fromMap(Map<String, dynamic> map) {
+    return Expense(
+      id: map['id'] as String? ?? '',
+      title: map['title'] as String,
+      amount: (map['amount'] as num).toDouble(),
+      currency: map['currency'] as String,
+      category: ExpenseCategory.values.byName(map['category'] as String),
+      date: (map['date'] as Timestamp).toDate(),
+      notes: map['notes'] as String?,
+      addedBy: map['addedBy'] as String,
+    );
+  }
 }

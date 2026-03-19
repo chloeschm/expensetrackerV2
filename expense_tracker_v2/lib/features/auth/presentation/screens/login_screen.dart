@@ -25,9 +25,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   Future<void> _submit(String email, String password) async {
     try {
       if (_isSignUp) {
-        ref.read(authProvider.notifier).register(email, password);
+        await ref.read(authProvider.notifier).register(email, password);
       } else {
-        ref.read(authProvider.notifier).login(email, password);
+        await ref.read(authProvider.notifier).login(email, password);
       }
     } catch (e) {
       if (mounted) {

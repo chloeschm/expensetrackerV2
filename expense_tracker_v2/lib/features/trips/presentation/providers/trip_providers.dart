@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:expense_tracker_v2/features/trips/domain/trip.dart';
 import 'package:expense_tracker_v2/features/trips/domain/trip_repository.dart';
 import 'package:expense_tracker_v2/features/trips/data/trip_repository_impl.dart';
@@ -22,38 +24,48 @@ class TripNotifier extends AsyncNotifier<List<Trip>> {
   @override
   Future<List<Trip>> build() async {
     final userId = ref.watch(authProvider);
-    if (userId == null) {
-      return [];
-    }
+    if (userId == null) return [];
     final repo = ref.read(tripRepositoryProvider);
-    return await repo.getTrips(userId).first;
+
+    final completer = Completer<List<Trip>>();
+
+    final sub = repo
+        .getTrips(userId)
+        .listen(
+          (trips) {
+            if (!completer.isCompleted) {
+              completer.complete(trips);
+            } else {
+              state = AsyncData(trips);
+            }
+          },
+          onError: (e) {
+            if (!completer.isCompleted) completer.completeError(e);
+          },
+        );
+
+    ref.onDispose(sub.cancel);
+
+    return completer.future;
   }
 
   Future<void> addTrip(Trip trip) async {
-    state = const AsyncLoading();
     await ref.read(tripRepositoryProvider).addTrip(trip);
-    ref.invalidateSelf();
   }
 
   Future<void> deleteTrip(String tripId) async {
-    state = const AsyncLoading();
     await ref.read(tripRepositoryProvider).deleteTrip(tripId);
-    ref.invalidateSelf();
   }
 
   Future<void> joinTrip(String code) async {
-    state = const AsyncLoading();
     final userId = ref.read(authProvider);
     if (userId == null) throw Exception('Not logged in');
     await ref.read(tripRepositoryProvider).joinTripByCode(code, userId);
-    ref.invalidateSelf();
   }
 
   Future<void> updateTrip(Trip trip) async {
-  state = const AsyncLoading();
-  await ref.read(tripRepositoryProvider).updateTrip(trip);
-  ref.invalidateSelf();
-}
+    await ref.read(tripRepositoryProvider).updateTrip(trip);
+  }
 }
 
 final tripNotifierProvider = AsyncNotifierProvider<TripNotifier, List<Trip>>(

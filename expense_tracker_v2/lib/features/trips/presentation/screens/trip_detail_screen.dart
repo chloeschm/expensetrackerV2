@@ -9,6 +9,7 @@ import '../utils/expense_category_utils.dart';
 import '../utils/group_expense_utils.dart';
 import '../widgets/trip_detail_header.dart';
 import '../widgets/budget_progress_card.dart';
+import '../../../expenses/presentation/screens/add_expense_args.dart';
 
 class TripDetailScreen extends ConsumerStatefulWidget {
   const TripDetailScreen({super.key, required this.tripId});
@@ -38,7 +39,7 @@ class _TripDetailScreenState extends ConsumerState<TripDetailScreen> {
 
   @override
   Widget build(BuildContext context) {
-      final tripId = widget.tripId;
+    final tripId = widget.tripId;
     final tripsAsync = ref.watch(tripNotifierProvider);
     final currentTrip = tripsAsync
         .whenData((trips) => trips.firstWhere((t) => t.id == tripId))
@@ -99,7 +100,10 @@ class _TripDetailScreenState extends ConsumerState<TripDetailScreen> {
             width: double.infinity,
             height: 50,
             child: ElevatedButton.icon(
-              onPressed: () => context.push('/home/trips/$tripId/expenses/new'),
+              onPressed: () => context.push(
+                '/home/trips/$tripId/expenses/new',
+                extra: AddExpenseArgs(tripId: tripId),
+              ),
               style: ElevatedButton.styleFrom(
                 backgroundColor: AppTheme.primary,
                 foregroundColor: Colors.white,

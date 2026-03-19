@@ -1,3 +1,4 @@
+import 'package:expense_tracker_v2/features/expenses/presentation/screens/add_expense_args.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -10,7 +11,8 @@ class ExpenseListItem extends ConsumerWidget {
   const ExpenseListItem({
     super.key,
     required this.expense,
-    required this.tripId, required String currency,
+    required this.tripId,
+    required String currency,
   });
 
   final Expense expense;
@@ -31,7 +33,12 @@ class ExpenseListItem extends ConsumerWidget {
         padding: const EdgeInsets.only(right: 16),
         child: const Icon(Icons.delete_outline, color: Colors.white),
       ),
-      onDismissed: (_) => ref.read(expenseNotifierProvider(tripId).notifier).deleteExpense(expense),
+      confirmDismiss: (_) async {
+        await ref
+            .read(expenseNotifierProvider(tripId).notifier)
+            .deleteExpense(expense);
+        return false;
+      },
       child: Container(
         margin: const EdgeInsets.symmetric(vertical: 3),
         decoration: BoxDecoration(
@@ -71,7 +78,10 @@ class ExpenseListItem extends ConsumerWidget {
               GestureDetector(
                 onTap: () => context.push(
                   '/home/trips/$tripId/expenses/new',
-                  extra: expense,
+                  extra: AddExpenseArgs(
+                    tripId: tripId,
+                    existingExpense: expense,
+                  ),
                 ),
                 child: const Text(
                   'Edit',

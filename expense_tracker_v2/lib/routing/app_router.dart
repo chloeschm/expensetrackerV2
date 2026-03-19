@@ -13,6 +13,9 @@ import '../features/trips/presentation/screens/home_screen.dart';
 
 final routerProvider = Provider<GoRouter>((ref) {
   final notifier = AuthRouterNotifier();
+
+  notifier.updateUser(ref.read(authProvider));
+
   ref.listen<String?>(authProvider, (previous, next) {
     notifier.updateUser(next);
   });
@@ -24,17 +27,11 @@ final routerProvider = Provider<GoRouter>((ref) {
       final bool isSignedIn = notifier.userId != null;
       final bool onSigninPage = state.matchedLocation == '/login';
 
-      if (!isSignedIn && !onSigninPage) {
-        return '/login';
-      }
-
-      if (isSignedIn && onSigninPage) {
-        return '/home';
-      }
+      if (!isSignedIn && !onSigninPage) return '/login';
+      if (isSignedIn && onSigninPage) return '/home';
 
       return null;
     },
-
     refreshListenable: notifier,
     initialLocation: "/home",
     routes: [
@@ -113,7 +110,7 @@ class ScaffoldWithBottomNavBar extends StatelessWidget {
               break;
             case 2:
               navigationShell.goBranch(
-                2,
+                1,
                 initialLocation: index == navigationShell.currentIndex,
               );
               break;
@@ -126,20 +123,5 @@ class ScaffoldWithBottomNavBar extends StatelessWidget {
         ],
       ),
     );
-  }
-}
-
-class AuthNotifier extends Notifier<String?> {
-  @override
-  String? build() {
-    return null;
-  }
-
-  void login(String userId) {
-    state = userId;
-  }
-
-  void logout() {
-    state = null;
   }
 }
