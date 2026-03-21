@@ -1,8 +1,8 @@
-import 'package:expense_tracker_v2/features/expenses/domain/expense.dart';
 import 'package:expense_tracker_v2/features/trips/domain/trip.dart';
 import 'package:expense_tracker_v2/features/trips/domain/trip_repository.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'dart:math';
+import '../../expenses/domain/expense.dart';
 
 class TripRepositoryImpl implements TripRepository {
   final FirebaseFirestore _firestore;
@@ -10,10 +10,23 @@ class TripRepositoryImpl implements TripRepository {
     : _firestore = firestore ?? FirebaseFirestore.instance;
 
   String _generateJoinCode() {
-  const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
-  final rand = Random();
-  return 'TR-${List.generate(4, (_) => chars[rand.nextInt(chars.length)]).join()}';
-}
+    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+    final rand = Random();
+    return 'TR-${List.generate(4, (_) => chars[rand.nextInt(chars.length)]).join()}';
+  }
+
+  Expense _expenseFromMap(Map<String, dynamic> map, String id) {
+    return Expense(
+      id: id,
+      title: map['title'] as String,
+      amount: (map['amount'] as num).toDouble(),
+      date: (map['date'] as Timestamp).toDate(),
+      currency: map['currency'] as String,
+      addedBy: map['addedBy'] as String,
+      category: ExpenseCategory.values.byName(map['category']),
+      notes: map['notes'] as String?,
+    );
+  }
 
   Trip _tripFromDoc(DocumentSnapshot doc) {
     return Trip(
@@ -30,8 +43,13 @@ class TripRepositoryImpl implements TripRepository {
       createdBy: doc['createdBy'],
       members: List<String>.from(doc['members'] ?? []),
       expenses: (doc['expenses'] as List<dynamic>? ?? [])
-    .map((e) => Expense.fromMap(e as Map<String, dynamic>))
-    .toList(),
+          .map(
+            (e) => _expenseFromMap(
+              e as Map<String, dynamic>,
+              e['id'] as String? ?? '',
+            ),
+          )
+          .toList(),
     );
   }
 
