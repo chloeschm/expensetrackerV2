@@ -1,7 +1,7 @@
+import 'package:expense_tracker_v2/features/auth/data/auth_repository_provider.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
+import '../../domain/auth_repository.dart';
 
 class AuthRouterNotifier extends ChangeNotifier {
   String? userId;
@@ -13,30 +13,29 @@ class AuthRouterNotifier extends ChangeNotifier {
 }
 
 class AuthNotifier extends Notifier<String?> {
+  late final AuthRepository _authRepository;
+
   @override
   String? build() {
-    final sub = FirebaseAuth.instance.authStateChanges().listen((user) {
-      state = user?.uid;
+    _authRepository = ref.read(authRepositoryProvider);
+
+    final sub = _authRepository.authStateChanges.listen((uid) {
+      state = uid;
     });
     ref.onDispose(sub.cancel);
-    return FirebaseAuth.instance.currentUser?.uid;
+
+    return _authRepository.currentUserId;
   }
 
   Future<void> login(String email, String password) async {
-    await FirebaseAuth.instance.signInWithEmailAndPassword(
-      email: email,
-      password: password,
-    );
+    await _authRepository.login(email, password);
   }
 
   Future<void> logout() async {
-    await FirebaseAuth.instance.signOut();
+    await _authRepository.logout();
   }
 
   Future<void> register(String email, String password) async {
-    await FirebaseAuth.instance.createUserWithEmailAndPassword(
-      email: email,
-      password: password,
-    );
+    await _authRepository.register(email, password);
   }
 }
