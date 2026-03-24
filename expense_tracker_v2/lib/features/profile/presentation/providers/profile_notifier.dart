@@ -1,4 +1,3 @@
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../auth/presentation/providers/auth_provider.dart';
 import '../../domain/profile.dart';
@@ -16,7 +15,7 @@ class UserProfileNotifier extends AsyncNotifier<UserProfile> {
     final fetched = await _repository.fetchProfile(_userId);
 
     if (fetched.displayName.isEmpty) {
-      final email = FirebaseAuth.instance.currentUser?.email ?? '';
+      final email = ref.read(authRepositoryProvider).currentUserEmail ?? '';
       final displayName = email.split('@').first;
       await saveProfile(displayName, 'USD');
       return UserProfile(displayName: displayName, preferredCurrency: 'USD');

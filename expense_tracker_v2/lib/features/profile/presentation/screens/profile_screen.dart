@@ -2,7 +2,7 @@ import 'package:expense_tracker_v2/features/trips/presentation/providers/trip_pr
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/theme/app_theme.dart';
-import 'package:firebase_auth/firebase_auth.dart';
+import '../../../auth/presentation/providers/auth_provider.dart';
 import '../providers/profile_providers.dart';
 import '../widgets/stat_item.dart';
 import '../widgets/edit_form_card.dart';
@@ -13,7 +13,7 @@ class ProfileScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final email = FirebaseAuth.instance.currentUser?.email ?? '';
+    final email = ref.read(authRepositoryProvider).currentUserEmail ?? '';
     final tripsAsync = ref.watch(tripNotifierProvider);
     final trips = tripsAsync.value ?? [];
 
@@ -85,7 +85,7 @@ class ProfileScreen extends ConsumerWidget {
               width: double.infinity,
               height: 50,
               child: OutlinedButton.icon(
-                onPressed: () => FirebaseAuth.instance.signOut(),
+                onPressed: () => ref.read(authProvider.notifier).logout(),
                 style: OutlinedButton.styleFrom(
                   foregroundColor: AppTheme.error,
                   side: BorderSide(color: AppTheme.error.withOpacity(0.4)),

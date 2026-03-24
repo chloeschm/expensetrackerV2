@@ -15,6 +15,9 @@ class FirebaseAuthRepository implements AuthRepository {
   String? get currentUserId => _firebaseAuth.currentUser?.uid;
 
   @override
+  String? get currentUserEmail => _firebaseAuth.currentUser?.email;
+
+  @override
   Future<void> login(String email, String password) async {
     await _firebaseAuth.signInWithEmailAndPassword(
       email: email,
