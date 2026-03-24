@@ -1,4 +1,4 @@
-import 'package:expense_tracker_v2/features/auth/data/auth_repository_provider.dart';
+import 'package:expense_tracker_v2/features/auth/presentation/providers/auth_provider.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter/foundation.dart';
 import '../../domain/auth_repository.dart';
