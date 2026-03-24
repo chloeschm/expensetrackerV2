@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/theme/app_theme.dart';
-import '../providers/profile_provider.dart';
+import '../providers/profile_providers.dart';
 import '../../../../core/utils/input_decoration.dart';
 
 class EditFormCard extends ConsumerStatefulWidget {

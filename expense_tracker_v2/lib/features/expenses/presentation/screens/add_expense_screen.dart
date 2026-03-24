@@ -1,7 +1,7 @@
 import 'package:expense_tracker_v2/features/expenses/domain/expense.dart';
 import 'package:expense_tracker_v2/features/expenses/presentation/widgets/ai_actions_row.dart';
 import 'package:expense_tracker_v2/features/expenses/presentation/widgets/category_selector.dart';
-import 'package:expense_tracker_v2/features/profile/presentation/providers/profile_provider.dart';
+import 'package:expense_tracker_v2/features/profile/presentation/providers/profile_providers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '..//../providers/expense_providers.dart';

@@ -5,7 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../domain/trip.dart';
 import '../../../../core/theme/app_theme.dart';
-import '../../../profile/presentation/providers/profile_provider.dart';
+import '../../../profile/presentation/providers/profile_providers.dart';
 import '../widgets/date_button.dart';
 import '../../../../core/widgets/label.dart';
 import '../../../../core/utils/input_decoration.dart';

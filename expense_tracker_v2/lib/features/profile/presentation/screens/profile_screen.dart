@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/theme/app_theme.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import '../providers/profile_provider.dart';
+import '../providers/profile_providers.dart';
 import '../widgets/stat_item.dart';
 import '../widgets/edit_form_card.dart';
 import '../widgets/profile_header.dart';
