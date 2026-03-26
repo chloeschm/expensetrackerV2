@@ -1,13 +1,16 @@
+import 'package:expense_tracker_v2/core/services/currency_service.dart';
+import 'package:expense_tracker_v2/features/trips/domain/services/expense_aggregation_service.dart';
+import 'package:expense_tracker_v2/features/trips/presentation/config/expense_category_config.dart';
+
 import '../../domain/trip.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:pdf/pdf.dart';
 import 'package:printing/printing.dart';
 import 'package:intl/intl.dart';
-import '../../presentation/utils/expense_category_utils.dart';
 
 Future<void> exportPDF(Trip trip) async {
   final pdf = pw.Document();
-  final totals = getCategoryTotals(trip);
+  final totals = getCategoryTotals(trip, trip.expenses as CurrencyService);
   final grandTotal = totals.isEmpty
       ? 0.0
       : totals.values.reduce((a, b) => a + b);

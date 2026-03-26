@@ -28,4 +28,25 @@ class Expense {
     this.notes,
     required this.addedBy,
   });
+  Expense copyWith({
+    String? id,
+    String? title,
+    double? amount,
+    String? currency,
+    ExpenseCategory? category,
+    DateTime? date,
+    String? notes,
+    String? addedBy,
+  }) {
+    return Expense(
+      id: id ?? this.id,
+      title: title ?? this.title,
+      amount: amount ?? this.amount,
+      currency: currency ?? this.currency,
+      category: category ?? this.category,
+      date: date ?? this.date,
+      notes: notes ?? this.notes,
+      addedBy: addedBy ?? this.addedBy,
+    );
+  }
 }

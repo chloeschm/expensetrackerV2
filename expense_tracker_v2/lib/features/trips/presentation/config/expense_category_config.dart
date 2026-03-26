@@ -1,8 +1,6 @@
-import 'package:expense_tracker_v2/features/trips/domain/trip.dart';
 import 'package:flutter/material.dart';
 import 'package:pdf/pdf.dart';
 import '../../../expenses/domain/expense.dart';
-import '../../../../core/services/currency_service.dart';
 
 Color categoryColor(ExpenseCategory cat) {
   switch (cat) {
@@ -80,16 +78,3 @@ PdfColor categoryPdfColor(ExpenseCategory category) {
   }
 }
 
-Map<ExpenseCategory, double> getCategoryTotals(Trip trip) {
-  final currencyService = CurrencyService();
-  final totals = <ExpenseCategory, double>{};
-  for (final expense in trip.expenses) {
-    final converted = currencyService.convert(
-      expense.amount,
-      expense.currency,
-      trip.currency,
-    );
-    totals[expense.category] = (totals[expense.category] ?? 0) + converted;
-  }
-  return totals;
-}

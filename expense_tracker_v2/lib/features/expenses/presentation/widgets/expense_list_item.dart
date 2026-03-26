@@ -1,4 +1,4 @@
-import 'package:expense_tracker_v2/features/expenses/presentation/screens/add_expense_args.dart';
+import 'package:expense_tracker_v2/features/expenses/presentation/models/add_expense_args.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';

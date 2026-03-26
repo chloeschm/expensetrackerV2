@@ -104,17 +104,13 @@ class _AddTripScreenState extends ConsumerState<AddTripScreen> {
       ref
           .read(tripNotifierProvider.notifier)
           .updateTrip(
-            Trip(
-              id: _existingTrip!.id,
+_existingTrip!.copyWith(
               name: _nameController.text.trim(),
               destination: _destinationController.text.trim(),
               startDate: _startDate!,
               endDate: _endDate,
               budget: _budget,
               currency: _currency,
-              expenses: _existingTrip!.expenses,
-              joinCode: _existingTrip!.joinCode,
-              members: _existingTrip!.members,
               createdBy: uid,
             ),
           );

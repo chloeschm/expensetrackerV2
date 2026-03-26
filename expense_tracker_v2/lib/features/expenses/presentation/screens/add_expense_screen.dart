@@ -7,7 +7,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '..//../providers/expense_providers.dart';
 import '../../../../core/theme/app_theme.dart';
 import 'package:go_router/go_router.dart';
-import 'add_expense_args.dart';
+import '../models/add_expense_args.dart';
 import '../../../../core/widgets/label.dart';
 import '../widgets/date_picker_field.dart';
 import '../widgets/amount_currency_row.dart';
@@ -102,15 +102,13 @@ class _AddExpenseScreenState extends ConsumerState<AddExpenseScreen> {
       ref
           .read(expenseNotifierProvider(_args!.tripId).notifier)
           .updateExpense(
-            Expense(
-              id: _args!.existingExpense!.id,
+            _args!.existingExpense!.copyWith(
               title: _title,
               amount: _amount,
               currency: _currency,
               category: _category,
               date: _date,
               notes: _notes,
-              addedBy: _args!.existingExpense!.addedBy,
             ),
           );
     } else {

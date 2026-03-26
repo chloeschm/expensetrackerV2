@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import '../../domain/trip.dart';
 import 'package:intl/intl.dart';
 import '../../../../core/theme/app_theme.dart';
-import '../../../../core/config/config.dart';
+import '../utils/map_utils.dart';
 
 class TripCard extends StatelessWidget {
   const TripCard({super.key, required this.trip, required this.onTap, required this.onEdit, required this.onDelete});
@@ -10,19 +10,6 @@ class TripCard extends StatelessWidget {
   final VoidCallback onTap;
   final VoidCallback onEdit;
   final VoidCallback onDelete;
-
-  String get _mapUrl {
-    final encoded = Uri.encodeComponent(trip.destination);
-    return 'https://maps.googleapis.com/maps/api/staticmap'
-        '?center=$encoded'
-        '&zoom=11'
-        '&size=600x200'
-        '&scale=2'
-        '&style=feature:all|element:labels.text.fill|color:0x4a6741'
-        '&style=feature:water|color:0xc9e4e7'
-        '&style=feature:landscape|color:0xf2f7f2'
-        '&key=${Config.googleMapsApiKey}';
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -73,7 +60,7 @@ class TripCard extends StatelessWidget {
                       fit: StackFit.expand,
                       children: [
                         Image.network(
-                          _mapUrl,
+                          mapUrl(trip.destination),
                           fit: BoxFit.cover,
                           loadingBuilder: (context, child, progress) {
                             if (progress == null) return child;

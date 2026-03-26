@@ -5,11 +5,11 @@ import '../providers/trip_providers.dart';
 import '../../../../core/services/currency_service.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../../expenses/presentation/widgets/expense_list_item.dart';
-import '../utils/expense_category_utils.dart';
-import '../utils/group_expense_utils.dart';
+import '../config/expense_category_config.dart';
+import '../../domain/services/expense_grouping_service.dart';
 import '../widgets/trip_detail_header.dart';
 import '../widgets/budget_progress_card.dart';
-import '../../../expenses/presentation/screens/add_expense_args.dart';
+import '../../../expenses/presentation/models/add_expense_args.dart';
 
 class TripDetailScreen extends ConsumerStatefulWidget {
   const TripDetailScreen({super.key, required this.tripId});

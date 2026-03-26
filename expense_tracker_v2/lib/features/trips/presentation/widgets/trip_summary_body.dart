@@ -1,13 +1,15 @@
+import 'package:expense_tracker_v2/core/services/currency_service.dart';
 import 'package:flutter/material.dart';
 import 'package:fl_chart/fl_chart.dart';
 import '../../domain/trip.dart';
 import '../../../../core/theme/app_theme.dart';
-import '../../presentation/utils/expense_category_utils.dart';
-import '../utils/pdf_export_utils.dart';
+import '../config/expense_category_config.dart';
+import '../../data/services/pdf_export_service.dart';
+import '../../domain/services/expense_aggregation_service.dart';
 
 class TripSummaryBody extends StatefulWidget {
   const TripSummaryBody({super.key, required this.trip});
-  
+
   final Trip trip;
 
   @override
@@ -19,7 +21,7 @@ class _TripSummaryBodyState extends State<TripSummaryBody> {
 
   @override
   Widget build(BuildContext context) {
-    final totals = getCategoryTotals(widget.trip);
+    final totals = getCategoryTotals(widget.trip, widget.trip.currency as CurrencyService);
 
     if (totals.isEmpty) {
       return Center(

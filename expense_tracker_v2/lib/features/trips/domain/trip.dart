@@ -27,6 +27,34 @@ class Trip {
     required this.createdBy,
   }) : members = members ?? [],
        expenses = expenses ?? [];
+       
+  Trip copyWith({
+    String? id,
+    String? name,
+    String? destination,
+    DateTime? startDate,
+    DateTime? endDate,
+    double? budget,
+    String? currency,
+    List<Expense>? expenses,
+    String? joinCode,
+    List<String>? members,
+    String? createdBy,
+  }) {
+    return Trip(
+      id: id ?? this.id,
+      name: name ?? this.name,
+      destination: destination ?? this.destination,
+      startDate: startDate ?? this.startDate,
+      endDate: endDate ?? this.endDate,
+      budget: budget ?? this.budget,
+      currency: currency ?? this.currency,
+      expenses: expenses ?? this.expenses,
+      joinCode: joinCode ?? this.joinCode,
+      members: members ?? this.members,
+      createdBy: createdBy ?? this.createdBy,
+    );
+  }
 
   double get totalSpent => expenses.fold(0, (sum, e) => sum + e.amount);
   double get remaining => budget - totalSpent;
